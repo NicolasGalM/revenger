@@ -10,8 +10,10 @@ public class GM : MonoBehaviour
     public int objetivoPuntos = 30;
 
     private int puntosTotales = 0;  // Solo puntos de la vida actual
+    private int toquesActuales = 0; // Toques actuales con EnemyFire
 
     public int PuntosTotales { get { return puntosTotales; } }
+    public int ToquesActuales { get { return toquesActuales; } }
 
     [Header("Referencias UI")]
     public HUD2 hud;
@@ -59,6 +61,9 @@ public class GM : MonoBehaviour
                 else hud.DesactivarVida(i);
 
             hud.ActualizarPuntos(puntosTotales, objetivoPuntos);
+            
+            // Si el HUD tiene método para mostrar toques, actualizarlo
+            // hud.ActualizarToques(toquesActuales); // Descomenta si implementas esto en HUD2
         }
     }
 
@@ -122,6 +127,7 @@ public class GM : MonoBehaviour
     {
         vidas = 3;
         puntosTotales = 0;
+        toquesActuales = 0; // Resetear toques también
         invencible = false;
 
         if (hud != null)
@@ -129,6 +135,7 @@ public class GM : MonoBehaviour
             for (int i = 0; i < hud.vidas.Length; i++)
                 hud.ActivarVida(i);
             hud.ActualizarPuntos(puntosTotales, objetivoPuntos);
+            // hud.ActualizarToques(toquesActuales); // Descomenta si implementas esto en HUD2
         }
     }
 
@@ -140,11 +147,28 @@ public class GM : MonoBehaviour
             hud.ActualizarPuntos(puntosTotales, objetivoPuntos);
     }
 
+    // Método para actualizar los toques actuales
+    public void ActualizarToques(int toques)
+    {
+        toquesActuales = toques;
+        Debug.Log($"🔥 Toques EnemyFire actualizados: {toquesActuales}");
+        
+        // Si el HUD tiene método para mostrar toques, actualizarlo
+        // if (hud != null)
+        //     hud.ActualizarToques(toquesActuales);
+    }
+
     // Método para llamar en caída al vacío
     public void CaidaAlVacio()
     {
         Debug.Log("⬇️ Caída al vacío detectada. Game Over.");
         ResetTodo();
         SceneManager.LoadScene("GameOver");
+    }
+    
+    // Método público para obtener toques actuales (útil para otros scripts)
+    public int GetToquesActuales()
+    {
+        return toquesActuales;
     }
 }

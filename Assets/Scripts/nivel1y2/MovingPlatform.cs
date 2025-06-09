@@ -28,7 +28,20 @@ public class MovingPlatform : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            collision.transform.SetParent(transform);
+            // Verificar que ambos objetos estén activos y que el jugador no tenga ya un parent
+            if (collision.transform != null && 
+                collision.gameObject.activeInHierarchy && 
+                gameObject.activeInHierarchy)
+            {
+                try
+                {
+                    collision.transform.SetParent(transform);
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"Error al conectar jugador a plataforma: {e.Message}");
+                }
+            }
         }
     }
 
@@ -36,13 +49,39 @@ public class MovingPlatform : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            StartCoroutine(DetachAfterFrame(collision.transform));
+            // Verificar múltiples condiciones antes de proceder
+            if (gameObject.activeInHierarchy && 
+                collision.transform != null && 
+                collision.gameObject.activeInHierarchy &&
+                collision.transform.parent == transform) // Solo si realmente es hijo de esta plataforma
+            {
+                StartCoroutine(DetachAfterFrame(collision.transform));
+            }
         }
     }
 
     IEnumerator DetachAfterFrame(Transform player)
     {
-        yield return null; // Espera un frame
-        player.SetParent(null);
+        // Verificar que tanto la plataforma como el jugador sigan existiendo
+        if (player != null && gameObject.activeInHierarchy)
+        {
+            yield return null; // Espera un frame
+            
+            // Verificaciones exhaustivas después del frame
+            if (player != null && 
+                player.gameObject.activeInHierarchy && 
+                gameObject.activeInHierarchy &&
+                player.parent == transform) // Solo desconectar si aún es hijo de esta plataforma
+            {
+                try
+                {
+                    player.SetParent(null);
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogWarning($"Error al desconectar jugador de plataforma: {e.Message}");
+                }
+            }
+        }
     }
 }

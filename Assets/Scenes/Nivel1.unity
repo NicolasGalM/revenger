@@ -22011,6 +22011,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   deathSound: {fileID: 8300000, guid: 1e605a720470eb74da320b2a70a26b3f, type: 3}
+  toqueEnemySound: {fileID: 8300000, guid: 0cd883318392ccb47aa53fc90efb376a, type: 3}
+  toquesEnemyFire: 0
+  toquesNecesarios: 2
   velocidadRebote: 5
 --- !u!1 &1812985962
 GameObject:
