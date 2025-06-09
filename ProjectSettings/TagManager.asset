@@ -5,6 +5,11 @@ TagManager:
   serializedVersion: 3
   tags:
   - Espada
+  - Ground
+  - EnemyFire
+  - MusicaFondo
+  - End
+  - Pinchos
   layers:
   - Default
   - TransparentFX

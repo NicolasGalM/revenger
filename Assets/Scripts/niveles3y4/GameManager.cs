@@ -74,12 +74,25 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void SumarPuntos(int puntosASumar)
+   public void SumarPuntos(int puntosASumar)
+{
+    PuntosTotales += puntosASumar;
+
+    string escenaActual = SceneManager.GetActiveScene().name;
+    int puntosMeta = 0;
+
+    if (monedasPorNivel.TryGetValue(escenaActual, out puntosMeta))
     {
-        PuntosTotales += puntosASumar;
         if (hud != null)
-            hud.ActualizarPuntos(PuntosTotales);
+            hud.ActualizarPuntos(PuntosTotales, puntosMeta); // nuevo método con dos argumentos
     }
+    else
+    {
+        if (hud != null)
+            hud.ActualizarPuntos(PuntosTotales); // fallback por si no encuentra meta
+    }
+}
+
 
     public void PerderVida()
     {

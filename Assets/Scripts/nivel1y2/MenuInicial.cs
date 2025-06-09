@@ -6,7 +6,7 @@ public class MenuInicial : MonoBehaviour
     
 
     public void Jugar(){
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        SceneManager.LoadScene("Niveles");
 
     }
 
@@ -14,6 +14,10 @@ public class MenuInicial : MonoBehaviour
         Debug.Log("Salir....");
         Application.Quit();
 
+    }
+
+    public void Ranking(){
+        SceneManager.LoadScene("OpRanking");
     }
 
     

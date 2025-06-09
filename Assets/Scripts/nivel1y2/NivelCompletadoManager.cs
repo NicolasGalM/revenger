@@ -8,15 +8,15 @@ using System.Globalization;
 
 public class NivelCompletadoManager : MonoBehaviour
 {
-    public string escenaNiveles = "Niveles"; // Nombre de la escena de selección de niveles
+    public string escenaNiveles = "Niveles";
 
-    public int levelId = 0; // ID del nivel en la base de datos (ej: 1, 2, 3...)
+    public int levelId = 0;
 
     private Dictionary<string, int> monedasPorNivel = new Dictionary<string, int>
     {
         { "Nivel1", 30 },
-        { "Nivel2", 26 },
-        { "Nivel3", 6 }
+        { "Nivel2", 30 },
+        
     };
 
     void Start()
@@ -24,12 +24,11 @@ public class NivelCompletadoManager : MonoBehaviour
         if (levelId <= 0)
         {
             string nombreEscena = SceneManager.GetActiveScene().name;
-
+            
             switch (nombreEscena)
             {
                 case "Nivel1": levelId = 1; break;
                 case "Nivel2": levelId = 2; break;
-                case "Nivel3": levelId = 3; break;
                 default:
                     Debug.LogWarning("⚠️ Escena no mapeada a levelId");
                     break;
@@ -61,8 +60,7 @@ public class NivelCompletadoManager : MonoBehaviour
         yield break;
     }
 
-    // 👉 Cambiar aquí para usar la variable acumulada:
-    int coins = GM.instance.MonedasAcumuladasNivel;
+    int coins = GM.instance.PuntosTotales; // Solo puntos de la vida actual
     int totalCoins = monedasPorNivel[escenaActual];
 
     if (coins < totalCoins)
@@ -89,6 +87,13 @@ public class NivelCompletadoManager : MonoBehaviour
     {
         Debug.Log("✅ Sesión guardada correctamente.");
         DesbloquearSiguienteNivel(levelId);
+
+        // Destruir el GameManager antes de cargar la escena de niveles
+        if (GM.instance != null)
+        {
+            Destroy(GM.instance.gameObject);
+        }
+
         SceneManager.LoadScene(escenaNiveles);
     }
     else

@@ -5,10 +5,10 @@ public class PLController : MonoBehaviour
     private Rigidbody2D rb;
     private bool isGrounded;
     private bool facingRight = true;
-    public AudioClip deathSound;     
+    public AudioClip deathSound;
     private AudioSource audioSource;
-
-    private bool haPerdidoVida = false; // 🔹 Controla que solo se pierda una vida por intento
+    private int golpesRecibidos = 0;
+    private bool haPerdidoVida = false; // Para evitar daño múltiple sin invencibilidad
 
     [Header("Rebote")]
     [SerializeField] private float velocidadRebote;
@@ -17,31 +17,29 @@ public class PLController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         audioSource = GetComponent<AudioSource>();
-        haPerdidoVida = false; // 🔹 Se resetea al iniciar la escena
+        haPerdidoVida = false;
     }
 
     void Update()
     {
         float move = Input.GetAxis("Horizontal");
-        rb.linearVelocity = new Vector2(move * 5f, rb.linearVelocity.y); // 🔹 Corrección de "linearVelocity" a "velocity"
+        rb.linearVelocity = new Vector2(move * 5f, rb.linearVelocity.y);
 
         if (move > 0 && !facingRight)
-        {
             Flip();
-        }
         else if (move < 0 && facingRight)
-        {
             Flip();
-        }
 
         if (Input.GetButtonDown("Jump") && isGrounded)
-        {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, 8f);
-        }
 
         if (transform.position.y < -10f)
+            Morir();
+
+        // Reseteamos para poder perder vida otra vez después de la invencibilidad
+        if (GM.instance != null && !GM.instance.invencible && haPerdidoVida)
         {
-            Die();
+            haPerdidoVida = false;
         }
     }
 
@@ -50,36 +48,49 @@ public class PLController : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
             isGrounded = true;
 
-        if (collision.gameObject.CompareTag("EnemyFire") && !haPerdidoVida)
+        if (collision.gameObject.CompareTag("EnemyFire"))
         {
             Enemy enemigo = collision.gameObject.GetComponent<Enemy>();
-            if(enemigo != null && !enemigo.fuePisado){
+            if (enemigo == null) return;
+
+            // Detecta contacto desde arriba (normal.y > 0.5f)
+            foreach (ContactPoint2D contact in collision.contacts)
+            {
+                if (contact.normal.y > 0.5f)
+                {
+                    if (!enemigo.fuePisado)
+                    {
+                        enemigo.fuePisado = true;
+                        Destroy(collision.gameObject); // Mata enemigo
+                        Rebote();
+                    }
+                    return; // No pierdes vida ni invencibilidad
+                }
+            }
+
+            // Daño frontal, solo si no estás invencible y no perdiste vida ya
+            if (GM.instance != null && !GM.instance.invencible && !haPerdidoVida)
+            {
                 haPerdidoVida = true;
-                Die();
+                GM.instance.RecibirDaño();
+
+                // Solo sonido o efectos, NO reiniciar nivel ni restar vida aquí
+                if (audioSource && deathSound)
+                    audioSource.PlayOneShot(deathSound);
             }
         }
-
-        /*if (collision.gameObject.CompareTag("End"))
+        if (collision.gameObject.CompareTag("Pinchos"))
         {
-            Debug.Log("Jugador tocó End. Volviendo a la pantalla inicial...");
-
-            if (GM.instance != null)
+            if (GM.instance != null && !GM.instance.invencible && !haPerdidoVida)
             {
-                GM.instance.CambiarEscena("IntroScene");
+                haPerdidoVida = true;
+                GM.instance.RecibirDaño();
+
+                // Solo sonido o efectos, NO reiniciar nivel ni restar vida aquí
+                if (audioSource && deathSound)
+                    audioSource.PlayOneShot(deathSound);
             }
-        }*/
-    }
-
-    void Flip()
-    {
-        facingRight = !facingRight;
-        Vector3 theScale = transform.localScale;
-        theScale.x = Mathf.Abs(theScale.x) * (facingRight ? 1 : -1); 
-        transform.localScale = theScale;
-    }
-
-    public void Rebote(){
-        rb.linearVelocity= new Vector2(rb.linearVelocity.x, velocidadRebote);
+        }
     }
 
     void OnCollisionExit2D(Collision2D collision)
@@ -88,30 +99,24 @@ public class PLController : MonoBehaviour
             isGrounded = false;
     }
 
-    void Die()
+    void Flip()
     {
-        if (audioSource && deathSound)
-        {
-            audioSource.PlayOneShot(deathSound);
-        }
-
-        if (GM.instance != null)
-        {
-            GM.instance.ReduceVidas();
-
-            if (GM.instance.vidas <= 0)
-            {
-                return;
-            }
-
-            Debug.Log("Te quedan " + GM.instance.vidas + " vidas");
-        }
-
-        Invoke("RestartLevel", 2f);
+        facingRight = !facingRight;
+        Vector3 theScale = transform.localScale;
+        theScale.x = Mathf.Abs(theScale.x) * (facingRight ? 1 : -1);
+        transform.localScale = theScale;
     }
 
-    void RestartLevel()
+    public void Rebote()
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, velocidadRebote);
+    }
+
+    void Morir()
+    {
+        if (GM.instance != null)
+        {
+            GM.instance.CaidaAlVacio();
+        }
     }
 }

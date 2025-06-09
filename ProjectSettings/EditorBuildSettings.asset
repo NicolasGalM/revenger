@@ -21,6 +21,12 @@ EditorBuildSettings:
     path: Assets/Scenes/MenuInicial.unity
     guid: 5dc69b79c08c4f94f92afb2c24f01bb1
   - enabled: 1
+    path: Assets/Scenes/OpRanking.unity
+    guid: c94761d769aec234e9515754ceff2fcc
+  - enabled: 1
+    path: Assets/Scenes/Ranking.unity
+    guid: a24762afb76ac4847895e09ddf64dc58
+  - enabled: 1
     path: Assets/Scenes/Niveles.unity
     guid: 1ef7edcea20dd4440999971c5edc3544
   - enabled: 1

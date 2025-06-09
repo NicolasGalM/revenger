@@ -1,30 +1,37 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
 
 public class GM : MonoBehaviour
 {
     public static GM instance;
 
     public int vidas = 3;
+    public int objetivoPuntos = 30;
 
-    private int puntosTotales;  // monedas esta vida
-    private int monedasAcumuladasNivel;  // acumuladas todas las vidas
+    private int puntosTotales = 0;  // Solo puntos de la vida actual
 
     public int PuntosTotales { get { return puntosTotales; } }
-    public int MonedasAcumuladasNivel { get { return monedasAcumuladasNivel; } }
 
     [Header("Referencias UI")]
     public HUD2 hud;
 
+    [Header("Invencibilidad")]
+    public bool invencible = false;
+    public float tiempoInvencible = 5f;
+
     void Awake()
     {
-        if (instance != null && instance != this) Destroy(gameObject);
-        else
+        Debug.Log($"🧪 GM Awake - instancia actual: {this.gameObject.name}");
+
+        if (instance != null && instance != this)
         {
-            instance = this;
-            DontDestroyOnLoad(gameObject);
+            Debug.Log($"🧪 GM duplicado detectado, destruyendo {this.gameObject.name}");
+            Destroy(gameObject);
+            return;
         }
+        instance = this;
+        DontDestroyOnLoad(gameObject);
     }
 
     void OnEnable()
@@ -40,14 +47,44 @@ public class GM : MonoBehaviour
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         hud = FindObjectOfType<HUD2>();
+        ActualizarHUD();
+    }
+
+    void ActualizarHUD()
+    {
         if (hud != null)
         {
             for (int i = 0; i < hud.vidas.Length; i++)
                 if (i < vidas) hud.ActivarVida(i);
                 else hud.DesactivarVida(i);
 
-            hud.ActualizarPuntos(puntosTotales);
+            hud.ActualizarPuntos(puntosTotales, objetivoPuntos);
         }
+    }
+
+    public void RecibirDaño()
+    {
+        if (invencible)
+        {
+            Debug.Log("🛡️ Daño recibido pero estamos invencibles.");
+            return;
+        }
+
+        ReduceVidas();
+
+        if (vidas > 0)
+        {
+            StartCoroutine(InvencibleTemporario());
+        }
+    }
+
+    private IEnumerator InvencibleTemporario()
+    {
+        invencible = true;
+        Debug.Log("🛡️ Invencibilidad activada.");
+        yield return new WaitForSeconds(tiempoInvencible);
+        invencible = false;
+        Debug.Log("🛡️ Invencibilidad desactivada.");
     }
 
     public void ReduceVidas()
@@ -60,15 +97,17 @@ public class GM : MonoBehaviour
 
         if (vidas <= 0)
         {
-            Debug.Log("💀 Sin vidas. Reseteando todo y volviendo a niveles.");
-            ResetTodo();  // reset monedas y vidas
+            Debug.Log("💀 Sin vidas. Reseteando todo y yendo a GameOver.");
+            ResetTodo();
             SceneManager.LoadScene("GameOver");
         }
         else
         {
-            // Reinicia solo la escena actual, reinicia puntos esta vida pero no el acumulado
-            ResetPuntosVida();
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            // Comentado para no resetear puntos al perder vida:
+            // ResetPuntosVida();
+
+            // No recargamos la escena para evitar reinicio total.
+            // Aquí podrías poner efectos visuales/audio de daño.
         }
     }
 
@@ -76,32 +115,36 @@ public class GM : MonoBehaviour
     {
         puntosTotales = 0;
         if (hud != null)
-            hud.ActualizarPuntos(puntosTotales);
+            hud.ActualizarPuntos(puntosTotales, objetivoPuntos);
     }
 
     public void ResetTodo()
     {
         vidas = 3;
         puntosTotales = 0;
-        monedasAcumuladasNivel = 0;
+        invencible = false;
 
         if (hud != null)
         {
             for (int i = 0; i < hud.vidas.Length; i++)
                 hud.ActivarVida(i);
-
-            hud.ActualizarPuntos(puntosTotales);
+            hud.ActualizarPuntos(puntosTotales, objetivoPuntos);
         }
     }
 
     public void SumarPuntos(int puntosASumar)
     {
         puntosTotales += puntosASumar;
-        monedasAcumuladasNivel += puntosASumar;
-
-        Debug.Log($"Monedas esta vida: {puntosTotales}, acumuladas en nivel: {monedasAcumuladasNivel}");
-
+        Debug.Log($"🪙 Puntos actuales esta vida: {puntosTotales}");
         if (hud != null)
-            hud.ActualizarPuntos(puntosTotales);
+            hud.ActualizarPuntos(puntosTotales, objetivoPuntos);
+    }
+
+    // Método para llamar en caída al vacío
+    public void CaidaAlVacio()
+    {
+        Debug.Log("⬇️ Caída al vacío detectada. Game Over.");
+        ResetTodo();
+        SceneManager.LoadScene("GameOver");
     }
 }
