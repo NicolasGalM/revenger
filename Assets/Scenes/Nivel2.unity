@@ -10924,8 +10924,8 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 24300002, guid: 522298eeb36767c479c755f33277b780, type: 2}
-  m_audioClip: {fileID: 8300000, guid: 27f9233506d3f294ab253dfaf0716bbc, type: 3}
-  m_Resource: {fileID: 8300000, guid: 27f9233506d3f294ab253dfaf0716bbc, type: 3}
+  m_audioClip: {fileID: 8300000, guid: 16b283df42268044f8a233d300584ba3, type: 3}
+  m_Resource: {fileID: 8300000, guid: 16b283df42268044f8a233d300584ba3, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 1
   m_Pitch: 1
@@ -14588,6 +14588,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   deathSound: {fileID: 8300000, guid: 1e605a720470eb74da320b2a70a26b3f, type: 3}
+  toqueEnemySound: {fileID: 8300000, guid: 0cd883318392ccb47aa53fc90efb376a, type: 3}
+  toquesEnemyFire: 0
+  toquesNecesarios: 2
   velocidadRebote: 5
 --- !u!1 &1812985962
 GameObject:
