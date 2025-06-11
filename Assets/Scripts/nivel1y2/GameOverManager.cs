@@ -12,7 +12,10 @@ public class GameOverManager : MonoBehaviour
 
 
     public void VolverAlMenu()
-    {
-        SceneManager.LoadScene("Niveles");
-    }
+{
+    Destroy(GM.instance?.gameObject); // 💥 Destruye el GM manualmente
+    Destroy(gameObject);
+    SceneManager.LoadScene("Niveles");
+}
+
 }
